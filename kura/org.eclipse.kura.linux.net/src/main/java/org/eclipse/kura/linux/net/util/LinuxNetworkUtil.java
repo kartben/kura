@@ -509,7 +509,7 @@ public class LinuxNetworkUtil {
 	
 	public static boolean toolExists(String tool) {
 		boolean ret = false;
-		String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/"};
+		String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/", "/home/root/bin/"};
 		
 		for (String folder : searchFolders) {
 			File fTool = new File(folder + tool);
