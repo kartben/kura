@@ -1,0 +1,37 @@
+#!/bin/bash
+
+JAVA=/usr/lib/jvm/jre/bin/java
+
+JAVA_OPTS=""
+
+KURA_BASE="/usr/lib/kura/instance"
+KURA_OPTS="-console -consoleLog -configuration /usr/lib/kura/instance/configuration"
+
+JAVA_OPTS="$JAVA_OPTS -Dlog4j.configuration=file:/etc/kura/log4j.properties"
+JAVA_OPTS="$JAVA_OPTS -Ddpa.configuration=/etc/kura/dpa.properties"
+
+JAVA_OPTS="$JAVA_OPTS -Dkura.home=/usr/lib/kura/instance"
+JAVA_OPTS="$JAVA_OPTS -Dkura.arch=armv7_hf"
+JAVA_OPTS="$JAVA_OPTS -Dkura.os.version=fedora"
+JAVA_OPTS="$JAVA_OPTS -Dkura.data.dir=/var/lib/kura/data"
+JAVA_OPTS="$JAVA_OPTS -Dkura.configuration=file:/etc/kura/kura.properties"
+JAVA_OPTS="$JAVA_OPTS -Dkura.custom.configuration=file:/etc/kura/kura-custom.properties"
+
+JAVA_OPTS="$JAVA_OPTS -Djava.security.policy=/etc/kura/jdk.dio.policy"
+JAVA_OPTS="$JAVA_OPTS -Djdk.dio.registry=/etc/kura/jdk.dio.properties"
+
+JAVA_OPTS="$JAVA_OPTS -Djdk.tls.trustNameService=true"
+
+echo "JAVA: $JAVA"
+echo "JAVA_OPTS: $JAVA_OPTS"
+
+echo "KURA_BASE: $KURA_BASE"
+echo "KURA_OPTS: $KURA_OPTS"
+
+cd "$KURA_BASE"
+
+eval exec $JAVA \
+	"$JAVA_OPTS" \
+	-jar plugins/org.eclipse.osgi_*.jar \
+	"$KURA_OPTS" \
+	"$@"

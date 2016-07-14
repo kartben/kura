@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>packages</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>eclipse-kura</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Eclipse Kura</name>
+	<description>This is Eclipse Kura</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.8</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+
+			<plugin>
+				<!-- due to an issue in the rpm builder -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>ant-init</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.directory}/instance/configuration" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>ant-target-platform</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- target platform -->
+
+								<copy todir="${project.build.directory}/instance/plugins">
+									<fileset
+										dir="${basedir}/../../../target-definition/common/repository/plugins">
+										<exclude name="slf4j.jdk14_*.jar" />
+										<include name="*.jar" />
+									</fileset>
+									<fileset
+										dir="${basedir}/../../../target-definition/equinox_3.8.1/repository/plugins">
+										<include name="*.jar" />
+									</fileset>
+								</copy>
+
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>ant-package</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- config.ini -->
+
+								<copy file="${basedir}/src/main/resources/config.ini"
+									todir="${project.build.directory}/instance/configuration" />
+
+								<propertyfile
+									file="${project.build.directory}/instance/configuration/config.ini">
+								</propertyfile>
+
+								<concat
+									dest="${project.build.directory}/instance/configuration/config.ini"
+									append="yes">
+									<filelist dir="${project.build.directory}" files="bundles.properties" />
+								</concat>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.0</version>
+				<executions>
+					<execution>
+						<id>generate-osgi-map</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>${basedir}/src/main/groovy/OsgiStartMap.groovy</source>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.api</artifactId>
+									<version>${org.eclipse.kura.api.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel</artifactId>
+									<version>${org.eclipse.kura.camel.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core</artifactId>
+									<version>${org.eclipse.kura.core.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.certificates</artifactId>
+									<version>${org.eclipse.kura.core.certificates.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.cloud</artifactId>
+									<version>${org.eclipse.kura.core.cloud.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.comm</artifactId>
+									<version>${org.eclipse.kura.core.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.configuration</artifactId>
+									<version>${org.eclipse.kura.core.configuration.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.crypto</artifactId>
+									<version>${org.eclipse.kura.core.crypto.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.deployment</artifactId>
+									<version>${org.eclipse.kura.core.deployment.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.log</artifactId>
+									<version>${org.eclipse.kura.core.log.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.net</artifactId>
+									<version>${org.eclipse.kura.core.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.agent</artifactId>
+									<version>${org.eclipse.kura.deployment.agent.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.customizer</artifactId>
+									<version>${org.eclipse.kura.deployment.customizer.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.customizer.upgrade</artifactId>
+									<version>${org.eclipse.kura.deployment.customizer.upgrade.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.update</artifactId>
+									<version>${org.eclipse.kura.deployment.update.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+									<version>${org.eclipse.kura.emulator.gpio.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.clock</artifactId>
+									<version>${org.eclipse.kura.emulator.clock.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.net</artifactId>
+									<version>${org.eclipse.kura.emulator.net.version}</version>
+								</artifactItem>
+								<!-- 
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.position</artifactId>
+									<version>${org.eclipse.kura.emulator.position.version}</version>
+								</artifactItem>
+								-->
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.usb</artifactId>
+									<version>${org.eclipse.kura.emulator.usb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.watchdog</artifactId>
+									<version>${org.eclipse.kura.emulator.watchdog.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.clock</artifactId>
+									<version>${org.eclipse.kura.linux.clock.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.command</artifactId>
+									<version>${org.eclipse.kura.linux.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.net</artifactId>
+									<version>${org.eclipse.kura.linux.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.position</artifactId>
+									<version>${org.eclipse.kura.linux.position.version}</version>
+								</artifactItem>
+								<!-- unsupported libudev -->
+								<!-- 
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.usb</artifactId>
+									<version>${org.eclipse.kura.linux.usb.version}</version>
+								</artifactItem>
+								 -->
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
+									<version>${org.eclipse.kura.linux.bluetooth.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
+									<version>${org.eclipse.kura.linux.watchdog.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.status</artifactId>
+									<version>${org.eclipse.kura.core.status.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.net.admin</artifactId>
+									<version>${org.eclipse.kura.net.admin.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+									<version>${org.eclipse.kura.protocol.modbus.version}</version>
+								</artifactItem>
+								
+								<!--  web2 -->
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.web2</artifactId>
+									<version>${org.eclipse.kura.web2.version}</version>
+								</artifactItem>
+								
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/instance/plugins</outputDirectory>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>de.dentrassi.maven</groupId>
+				<artifactId>rpm</artifactId>
+				<version>0.7.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+						<configuration>
+						
+							<skipSigning>true</skipSigning>
+							
+							<requires>
+								<require>net-tools</require>
+							</requires>
+							
+							<entries>
+								<entry>
+									<name>/etc/kura</name>
+									<directory>true</directory>
+								</entry>
+								<entry>
+									<name>/etc/kura</name>
+									<collect>
+										<from>src/main/resources/etc</from>
+									</collect>
+									<configuration>true</configuration>
+								</entry>
+								<entry>
+									<name>/usr/lib/kura</name>
+									<directory>true</directory>
+								</entry>
+								<entry>
+									<name>/var/lib/kura</name>
+									<directory>true</directory>
+								</entry>
+								<entry>
+									<name>/var/lib/kura/data</name>
+									<directory>true</directory>
+								</entry>
+								<entry>
+									<name>/var/lib/kura/security</name>
+									<directory>true</directory>
+								</entry>
+								<entry>
+									<name>/var/lib/kura/data/snapshots/snapshot_0.xml</name>
+									<file>src/main/resources/data/snapshot_0.xml</file>
+								</entry>
+								<entry>
+									<name>/usr/lib/kura/instance</name>
+									<collect>
+										<from>${project.build.directory}/instance</from>
+									</collect>
+								</entry>
+								<entry>
+									<name>/usr/bin/kura-server</name>
+									<file>${basedir}/src/main/resources/launcher</file>
+									<mode>0755</mode>
+								</entry>
+							</entries>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
